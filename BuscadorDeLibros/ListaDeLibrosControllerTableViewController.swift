@@ -103,6 +103,7 @@ class ListaDeLibrosControllerTableViewController: UITableViewController {
             // Get the new view controller using segue.destinationViewController.
             let detalle = segue.destinationViewController as! DetalleDeLibroViewController
             let indexPath = self.tableView.indexPathForSelectedRow
+            detalle.isbn = Libros[indexPath!.item].isbn
             detalle.titulo = Libros[indexPath!.item].titulo
             detalle.autores = Libros[indexPath!.item].autores
             detalle.urlPortada = Libros[indexPath!.item].portada

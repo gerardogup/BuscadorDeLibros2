@@ -98,7 +98,7 @@ class BuscadorDeLibrosViewController: UIViewController, UITextFieldDelegate {
     @IBAction func guardarLibro(sender: UIBarButtonItem) {
         //agregar libro a la colección
         if lblTitulo.text != nil && lblTitulo.text != "" {
-            ColeccionDeLibros.Libros.append(ColeccionDeLibros.Libro(titulo: lblTitulo.text!, autores: lblAutor.text, portada: urlPortada))
+            ColeccionDeLibros.Libros.append(ColeccionDeLibros.Libro(isbn: txtISBN.text!, titulo: lblTitulo.text!, autores: lblAutor.text, portada: urlPortada))
             //cerrar el modal
             dismissViewControllerAnimated(true, completion: nil)
         }

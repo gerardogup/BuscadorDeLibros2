@@ -10,10 +10,12 @@ import UIKit
 
 class DetalleDeLibroViewController: UIViewController {
     
+    var isbn: String = ""
     var titulo: String = ""
     var autores: String? = nil
     var urlPortada: String? = nil
     
+    @IBOutlet weak var lblISBN: UILabel!
     @IBOutlet weak var lblTitulo: UILabel!
     @IBOutlet weak var labelAutores: UILabel!
     @IBOutlet weak var lblAutores: UILabel!
@@ -26,6 +28,7 @@ class DetalleDeLibroViewController: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
+        lblISBN.text = self.isbn
         lblTitulo.text = self.titulo
         if self.autores != nil {
             lblAutores.text = self.autores
