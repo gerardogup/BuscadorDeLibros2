@@ -7,21 +7,54 @@
 //
 
 import UIKit
+import CoreData
 
 private let reuseIdentifier = "Cell"
 
 class ListaDeLibrosControllerTableViewController: UITableViewController {
 
-    var Libros = ColeccionDeLibros.Libros
+    //var Libros = ColeccionDeLibros.Libros
+    var Libros: [ColeccionDeLibros.Libro] = []
+    var contexto: NSManagedObjectContext? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.contexto = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+        cargarLibros()
         
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
+    }
+    
+    func cargarLibros() {
+        self.Libros = []
+        let libroEntidad = NSEntityDescription.entityForName("Libro", inManagedObjectContext: self.contexto!)
+        let peticion = libroEntidad?.managedObjectModel.fetchRequestTemplateForName("petLibros")
+        do {
+            let librosEntidad = try self.contexto?.executeFetchRequest(peticion!)
+            for libro in librosEntidad! {
+                let isbn = libro.valueForKey("isbn") as! String
+                let titulo = libro.valueForKey("titulo") as! String
+                let autores = libro.valueForKey("tiene") as! Set<NSObject>
+                var autores2: [ColeccionDeLibros.Autor] = []
+                for autor in autores {
+                    let nombre: String = autor.valueForKey("nombre") as! String
+                    autores2.append(ColeccionDeLibros.Autor(nombre: nombre))
+                }
+                var portadaImg: UIImage? = nil
+                if libro.valueForKey("portada") != nil {
+                    portadaImg = UIImage(data: libro.valueForKey("portada") as! NSData)
+                }
+                
+                self.Libros.append(ColeccionDeLibros.Libro(isbn: isbn, titulo: titulo, autores: autores2, portadaImg: portadaImg))
+            }
+        } catch {
+            
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,7 +63,10 @@ class ListaDeLibrosControllerTableViewController: UITableViewController {
     }
 
     override func viewWillAppear(animated: Bool) {
-        Libros = ColeccionDeLibros.Libros
+        //Libros = ColeccionDeLibros.Libros
+        
+        cargarLibros()
+        
         self.tableView.reloadData()
     }
     
@@ -70,8 +106,23 @@ class ListaDeLibrosControllerTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             // Delete the row from the data source
-            ColeccionDeLibros.Libros.removeAtIndex(indexPath.item)
-            Libros = ColeccionDeLibros.Libros
+            //ColeccionDeLibros.Libros.removeAtIndex(indexPath.item)
+            //Libros = ColeccionDeLibros.Libros
+            let libroEntidad = NSEntityDescription.entityForName("Libro", inManagedObjectContext: self.contexto!)
+            let peticion = libroEntidad?.managedObjectModel.fetchRequestFromTemplateWithName("petLibro", substitutionVariables: ["isbn" : Libros[indexPath.item].isbn])
+            do {
+                let libroAEliminar = try self.contexto?.executeFetchRequest(peticion!)
+                if libroAEliminar?.count > 0 {
+                    self.contexto?.deleteObject(libroAEliminar![0] as! NSManagedObject)
+                }
+                try self.contexto?.save()
+            }
+            catch {
+                
+            }
+            
+            Libros.removeAtIndex(indexPath.item)
+            
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         } else if editingStyle == .Insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
@@ -105,8 +156,13 @@ class ListaDeLibrosControllerTableViewController: UITableViewController {
             let indexPath = self.tableView.indexPathForSelectedRow
             detalle.isbn = Libros[indexPath!.item].isbn
             detalle.titulo = Libros[indexPath!.item].titulo
-            detalle.autores = Libros[indexPath!.item].autores
-            detalle.urlPortada = Libros[indexPath!.item].portada
+            for autor in Libros[indexPath!.item].autores {
+                detalle.autores = autor.nombre
+                if Libros[indexPath!.item].autores.count > 1 {
+                    detalle.autores += " & "
+                }
+            }
+            detalle.portadaImg = Libros[indexPath!.item].portadaImg
             // Pass the selected object to the new view controller.
 
         }

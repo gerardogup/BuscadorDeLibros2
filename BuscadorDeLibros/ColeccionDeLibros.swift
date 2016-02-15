@@ -7,21 +7,30 @@
 //
 
 import Foundation
+import UIKit
 
 public class ColeccionDeLibros {
     static var Libros: [Libro] = []
     
+    public struct Autor {
+        var nombre: String = ""
+        
+        init(nombre: String){
+            self.nombre = nombre
+        }
+    }
+    
     public struct Libro {
         var isbn: String = ""
         var titulo: String = ""
-        var autores: String? = nil
-        var portada: String? = nil
+        var autores: [Autor] = []
+        var portadaImg: UIImage? = nil
         
-        init(isbn:String, titulo:String, autores:String?, portada:String?){
+        init(isbn:String, titulo:String, autores:[Autor], portadaImg:UIImage?){
             self.isbn = isbn
             self.titulo = titulo
             self.autores = autores
-            self.portada = portada
+            self.portadaImg = portadaImg
         }
     }
 }

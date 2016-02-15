@@ -12,8 +12,8 @@ class DetalleDeLibroViewController: UIViewController {
     
     var isbn: String = ""
     var titulo: String = ""
-    var autores: String? = nil
-    var urlPortada: String? = nil
+    var autores: String = ""
+    var portadaImg: UIImage? = nil
     
     @IBOutlet weak var lblISBN: UILabel!
     @IBOutlet weak var lblTitulo: UILabel!
@@ -30,18 +30,15 @@ class DetalleDeLibroViewController: UIViewController {
     override func viewWillAppear(animated: Bool) {
         lblISBN.text = self.isbn
         lblTitulo.text = self.titulo
-        if self.autores != nil {
+        if self.autores != "" {
             lblAutores.text = self.autores
         } else {
             lblAutores.text = ""
         }
-        if self.urlPortada != nil {
-            if let url = NSURL(string: self.urlPortada!) {
-                if let data = NSData(contentsOfURL: url) {
-                    imgPortada.image = UIImage(data: data)
-                    imgPortada.sizeToFit()
-                }
-            }
+        if self.portadaImg != nil {
+            imgPortada.image = self.portadaImg
+            imgPortada.sizeToFit()
+
         } else {
             imgPortada.image = nil
         }

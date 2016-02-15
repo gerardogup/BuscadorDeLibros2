@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class BuscadorDeLibrosViewController: UIViewController, UITextFieldDelegate {
 
@@ -17,10 +18,13 @@ class BuscadorDeLibrosViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var labelAutores: UILabel!
     
     var urlPortada: String? = nil
+    var contexto: NSManagedObjectContext? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.contexto = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+        
         // Do any additional setup after loading the view.
         txtISBN.delegate = self
     }
@@ -95,10 +99,37 @@ class BuscadorDeLibrosViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    func obtenerAutores (autores: String) -> Set<NSObject> {
+        var autoresEntidades = Set<NSObject>()
+        if(autores != ""){
+            let autoresArr = autores.characters.split{$0 == "&"}.map(String.init)
+            for autorStr in autoresArr {
+                let autorEntidad = NSEntityDescription.insertNewObjectForEntityForName("Autor", inManagedObjectContext: self.contexto!)
+                autorEntidad.setValue(autorStr, forKey: "nombre")
+                autoresEntidades.insert(autorEntidad)
+            }
+        }
+        return autoresEntidades
+    }
+    
     @IBAction func guardarLibro(sender: UIBarButtonItem) {
         //agregar libro a la colección
         if lblTitulo.text != nil && lblTitulo.text != "" {
-            ColeccionDeLibros.Libros.append(ColeccionDeLibros.Libro(isbn: txtISBN.text!, titulo: lblTitulo.text!, autores: lblAutor.text, portada: urlPortada))
+            //ColeccionDeLibros.Libros.append(ColeccionDeLibros.Libro(isbn: txtISBN.text!, titulo: lblTitulo.text!, autores: lblAutor.text, portada: urlPortada))
+            let nuevoLibro = NSEntityDescription.insertNewObjectForEntityForName("Libro", inManagedObjectContext: self.contexto!)
+            nuevoLibro.setValue(txtISBN.text!, forKey: "isbn")
+            nuevoLibro.setValue(lblTitulo.text!, forKey: "titulo")
+            if imgPortada.image != nil {
+                nuevoLibro.setValue(UIImagePNGRepresentation(imgPortada.image!), forKey: "portada")
+            }
+            nuevoLibro.setValue(obtenerAutores(lblAutor.text!), forKey: "tiene")
+            do {
+                try self.contexto?.save()
+            }
+            catch {
+                
+            }
+            
             //cerrar el modal
             dismissViewControllerAnimated(true, completion: nil)
         }
